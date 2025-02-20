@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: teams_database
+      MYSQL_USER: monuser
+      MYSQL_PASSWORD: monpass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./teams_database.sql:/docker-entrypoint-initdb.d/teams_database.sql
+
+  app:
+    build: .
+    container_name: spring_boot_app
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/teams_database?createDatabaseIfNotExist=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: monuser
+      SPRING_DATASOURCE_PASSWORD: monpass
+
+volumes:
+  db_data:
